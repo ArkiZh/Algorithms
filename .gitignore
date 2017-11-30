@@ -1,0 +1,9 @@
+# https://git-scm.com/docs/gitignore
+
+# IntelliJ project files
+.idea
+*.iml
+out/
+
+# Maven files
+target/
