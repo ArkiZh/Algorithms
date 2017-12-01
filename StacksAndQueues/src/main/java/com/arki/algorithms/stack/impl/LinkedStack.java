@@ -13,11 +13,13 @@ public class LinkedStack<T> implements Stack<T> {
         first = new Node<T>();
         first.item = t;
         first.next = oldFirst;
+        size++;
     }
 
     public T pop() {
         T item = first.item;
         first= first.next;
+        size--;
         return item;
     }
 
