@@ -21,7 +21,7 @@ public class LinkedStack<T> implements Stack<T> {
         return item;
     }
 
-    private class Node<M>{
+    class Node<M>{
         M item;
         Node<M> next;
     }
