@@ -2,22 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>com.arki</groupId>
         <artifactId>algorithms-course-parent</artifactId>
+        <groupId>com.arki</groupId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../Parent/pom.xml</relativePath>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>algorithms-course-stacksandqueues</artifactId>
+    <artifactId>algorithms-course-common</artifactId>
 
     <dependencies>
+        <!-- slf4j log -->
         <dependency>
-            <groupId>com.arki</groupId>
-            <artifactId>algorithms-course-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+        <!-- JUnit test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 
