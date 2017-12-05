@@ -1,6 +1,7 @@
 package com.arki.algorithms.stack;
 
 import com.arki.algorithms.common.Logger;
+import com.arki.algorithms.queue.impl.LinkedQueue;
 import com.arki.algorithms.stack.impl.LinkedStack;
 import org.junit.Test;
 
@@ -19,6 +20,5 @@ public class StackTest {
             Integer pop = linkedStack.pop();
             Logger.info(pop.toString());
         }
-
     }
 }

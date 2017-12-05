@@ -2,7 +2,14 @@ package com.arki.algorithms.stack.impl;
 
 import com.arki.algorithms.stack.Stack;
 
+import java.util.Iterator;
+
 public class LinkedStack<T> implements Stack<T> {
+
+    private class Node<M>{
+        M item;
+        Node<M> next;
+    }
 
     private Node<T> first;
     private int size;
@@ -23,8 +30,16 @@ public class LinkedStack<T> implements Stack<T> {
         return item;
     }
 
-    class Node<M>{
-        M item;
-        Node<M> next;
+    public boolean isEmpty() {
+        return first==null;
     }
+
+    public T peek() {
+        return first.item;
+    }
+
+    public Iterator<T> iterator() {
+        return null;
+    }
+
 }
