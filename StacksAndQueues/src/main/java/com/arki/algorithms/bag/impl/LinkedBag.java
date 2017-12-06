@@ -31,17 +31,21 @@ public class LinkedBag <T> implements Bag<T>{
     }
 
     public Iterator<T> iterator() {
-        return null;
+        return new LinkedListIterator();
     }
 
-    private class LinkedIterator implements Iterator<T>{
+    private class LinkedListIterator implements Iterator<T>{
+
+        private Node current = first;
 
         public boolean hasNext() {
-            return false;
+            return current!=null;
         }
 
         public T next() {
-            return null;
+            T item = current.item;
+            current = current.next;
+            return item;
         }
 
         public void remove() {

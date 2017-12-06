@@ -4,6 +4,8 @@ import com.arki.algorithms.common.Logger;
 import com.arki.algorithms.queue.impl.LinkedQueue;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 public class QueueTest {
     @Test
     public void testLinkedQueue(){
@@ -11,9 +13,13 @@ public class QueueTest {
         for (int i = 0; i < 10; i++) {
             linkedQueue.enqueue(i);
         }
+        Iterator<Integer> iterator = linkedQueue.iterator();
+        while (iterator.hasNext()) {
+            Logger.info("Traversal: " + iterator.next());
+        }
         while (!linkedQueue.isEmpty()) {
             Integer dequeue = linkedQueue.dequeue();
-            Logger.info(dequeue.toString());
+            Logger.info("Dequeue: " + dequeue);
         }
     }
 }

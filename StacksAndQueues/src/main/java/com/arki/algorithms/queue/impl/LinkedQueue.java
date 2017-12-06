@@ -5,18 +5,18 @@ import com.arki.algorithms.queue.Queue;
 import java.util.Iterator;
 
 public class LinkedQueue<T> implements Queue<T>{
-    private class Node<M>{
-        M item;
-        Node<M> next;
+    private class Node{
+        T item;
+        Node next;
     }
 
-    private Node<T> first;
-    private Node<T> last;
+    private Node first;
+    private Node last;
     private int size;
 
     public void enqueue(T t) {
-        Node<T> oldLast = last;
-        last = new Node<T>();
+        Node oldLast = last;
+        last = new Node();
         last.item = t;
         last.next = null;
         if (isEmpty()) {
@@ -59,9 +59,11 @@ public class LinkedQueue<T> implements Queue<T>{
     }
 
     private class LinkedListIterator implements Iterator<T>{
-        private Node<T> current = first;
+
+        private Node current = first;
+
         public boolean hasNext() {
-            return !isEmpty();
+            return current != null;
         }
 
         public T next() {

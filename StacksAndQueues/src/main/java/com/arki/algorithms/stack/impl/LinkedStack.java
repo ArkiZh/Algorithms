@@ -6,18 +6,18 @@ import java.util.Iterator;
 
 public class LinkedStack<T> implements Stack<T> {
 
-    private class Node<M>{
-        M item;
-        Node<M> next;
+    private class Node{
+        T item;
+        Node next;
     }
 
-    private Node<T> first;
+    private Node first;
     private int size;
 
     public int size(){ return size;}
     public void push(T t) {
-        Node<T> oldFirst = first;
-        first = new Node<T>();
+        Node oldFirst = first;
+        first = new Node();
         first.item = t;
         first.next = oldFirst;
         size++;
@@ -39,7 +39,26 @@ public class LinkedStack<T> implements Stack<T> {
     }
 
     public Iterator<T> iterator() {
-        return null;
+        return new LinkedListIterator();
+    }
+
+    private class LinkedListIterator implements Iterator<T>{
+
+        private Node current = first;
+
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        public T next() {
+            T item = current.item;
+            current = current.next;
+            return item;
+        }
+
+        public void remove() {
+
+        }
     }
 
 }
