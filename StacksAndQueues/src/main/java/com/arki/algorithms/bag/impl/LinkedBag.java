@@ -6,17 +6,17 @@ import java.util.Iterator;
 
 public class LinkedBag <T> implements Bag<T>{
 
-    private class Node<M>{
-        M item;
-        Node<M> next;
+    private class Node{
+        T item;
+        Node next;
     }
 
-    private Node<T> first;
+    private Node first;
     private int size;
 
     public void add(T t) {
-        Node<T> oldFirst = this.first;
-        first=new Node<T>();
+        Node oldFirst = this.first;
+        first=new Node();
         first.item = t;
         first.next = oldFirst;
         size++;
@@ -32,5 +32,20 @@ public class LinkedBag <T> implements Bag<T>{
 
     public Iterator<T> iterator() {
         return null;
+    }
+
+    private class LinkedIterator implements Iterator<T>{
+
+        public boolean hasNext() {
+            return false;
+        }
+
+        public T next() {
+            return null;
+        }
+
+        public void remove() {
+
+        }
     }
 }
