@@ -8,8 +8,8 @@ public class ArrayQueue<T> implements Queue<T> {
 
     private T[] items;
 
-    private int first;
-    private int last;
+    private int first = -1;
+    private int last = -1;
     private int defaultCapacity = 10;
 
     public ArrayQueue(){
@@ -17,7 +17,6 @@ public class ArrayQueue<T> implements Queue<T> {
     }
 
     public void enqueue(T t) {
-
     }
 
     public T dequeue() {
@@ -29,7 +28,7 @@ public class ArrayQueue<T> implements Queue<T> {
     }
 
     public int size() {
-        return 0;
+        return last >= first ? last - first + 1 : last - first + items.length - 1;
     }
 
     public T first() {
@@ -38,6 +37,10 @@ public class ArrayQueue<T> implements Queue<T> {
 
     public T last() {
         return null;
+    }
+
+    private boolean isFull(){
+        return false;
     }
 
     public Iterator<T> iterator() {
