@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 public class ArrayStack<T> implements Stack<T> {
     private T[] items;
-    private int defaultCapacity;
+    private int defaultCapacity = 10;
 
     public  ArrayStack(){
         items = (T[]) new Object[defaultCapacity];
