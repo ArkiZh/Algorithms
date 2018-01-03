@@ -10,9 +10,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>../Common</module>
-        <module>../UnionFind</module>
-        <module>../StacksAndQueues</module>
+        <module>algorithms-course-common</module>
+        <module>algorithms-course-unionfind</module>
+        <module>algorithms-course-stacksandqueues</module>
     </modules>
 
     <dependencyManagement>

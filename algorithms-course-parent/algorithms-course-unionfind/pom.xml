@@ -8,10 +8,10 @@
         <groupId>com.arki</groupId>
         <artifactId>algorithms-course-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>../Parent/pom.xml</relativePath>
+        <relativePath>pom.xml</relativePath>
     </parent>
 
-    <artifactId>algorithms-course-stacksandqueues</artifactId>
+    <artifactId>algorithms-course-unionfind</artifactId>
 
     <dependencies>
         <dependency>
