@@ -1,5 +1,6 @@
 package com.arki.algorithms.bag;
 
+import com.arki.algorithms.bag.impl.ArrayBag;
 import com.arki.algorithms.bag.impl.LinkedBag;
 import com.arki.algorithms.common.Logger;
 import org.junit.Test;
@@ -16,7 +17,19 @@ public class BagTest {
         }
         Iterator<Integer> iterator = linkedBag.iterator();
         while (iterator.hasNext()){
-            Logger.info("Traversal: " + iterator.next());
+            Logger.info("Linked bag traversal: " + iterator.next());
+        }
+    }
+
+    @Test
+    public void testArrayBag(){
+        ArrayBag<Integer> arrayBag = new ArrayBag<Integer>();
+        for (int i = 0; i < 15; i++) {
+            arrayBag.add(i);
+        }
+        Iterator<Integer> iterator = arrayBag.iterator();
+        while (iterator.hasNext()) {
+            Logger.info("Array-based bag traversal: " + iterator.next());
         }
     }
 }
