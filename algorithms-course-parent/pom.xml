@@ -13,6 +13,7 @@
         <module>algorithms-course-common</module>
         <module>algorithms-course-unionfind</module>
         <module>algorithms-course-stacksandqueues</module>
+        <module>algorithms-course-sort</module>
     </modules>
 
     <dependencyManagement>
