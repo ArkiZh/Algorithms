@@ -29,8 +29,8 @@ public class Logger {
      */
     public static void info(String format, Object... arguments){
         if(arguments==null||arguments.length==0) log.info(format);
-        else if(arguments.length==1) log.info(format, arguments[0]);
-        else if (arguments.length==2) log.info(format, arguments[0], arguments[1]);
+        else if(arguments.length==1) log.info(getInvokerInfo() + "=============== " + format, arguments[0]);
+        else if (arguments.length==2) log.info(getInvokerInfo() + "=============== " + format, arguments[0], arguments[1]);
         else log.info(getInvokerInfo() + "=============== " + format, arguments);
     }
 
