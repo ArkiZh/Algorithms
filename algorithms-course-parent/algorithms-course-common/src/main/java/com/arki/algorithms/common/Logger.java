@@ -18,21 +18,50 @@ public class Logger {
     /**
      * Log a message at the INFO level according to the specified format
      * and arguments.
-     * <p/>
-     * <p>This form avoids superfluous string concatenation when the logger
-     * is disabled for the INFO level. However, this variant incurs the hidden
-     * (and relatively small) cost of creating an <code>Object[]</code> before invoking the method,
-     * even if this logger is disabled for INFO.
      *
      * @param format    the format string
      * @param arguments a list of arguments
      */
     public static void info(String format, Object... arguments){
         if(arguments==null||arguments.length==0) log.info(format);
-        else if(arguments.length==1) log.info(getInvokerInfo() + "=============== " + format, arguments[0]);
-        else if (arguments.length==2) log.info(getInvokerInfo() + "=============== " + format, arguments[0], arguments[1]);
         else log.info(getInvokerInfo() + "=============== " + format, arguments);
     }
+
+    /**
+     * Log a message at the ERROR level.
+     *
+     * @param msg the message string to be logged
+     */
+    public static void error(String msg){
+        log.error(getInvokerInfo() + "=============== " + msg);
+    }
+
+    /**
+     * Log a message at the ERROR level according to the specified format
+     * and arguments.
+     *
+     * @param format    the format string
+     * @param arguments a list of arguments
+     */
+    public static void error(String format, Object... arguments){
+        if(arguments==null||arguments.length==0) log.error(format);
+        else log.error(getInvokerInfo() + "=============== " + format, arguments);
+    }
+
+    /**
+     * Log an exception (throwable) at the ERROR level with an
+     * accompanying message.
+     *
+     * @param msg the message accompanying the exception.
+     *            If it is <code>null</code>, will use the default value: <code>t.getLocalizedMessage()</code>
+     * @param t   the exception (throwable) to log
+     */
+    public static void error(String msg, Throwable t){
+        if(msg==null) msg = t.getLocalizedMessage();
+        log.error(getInvokerInfo() + "=============== " + msg, t);
+    }
+
+
 
     /**
      * Method Description: Get the method info which invoke this Logger.java's method.
