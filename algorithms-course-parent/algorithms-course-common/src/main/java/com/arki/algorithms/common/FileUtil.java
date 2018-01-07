@@ -121,11 +121,25 @@ public class FileUtil {
         }
     }
 
+    /**
+     * @param path
+     * @return  <code>File</code>  The created file, if execute successfully;
+     *          The file will be renamed if it already exists, for example:
+     *          temp.txt => temp(1).txt
+     *          temp(3).txt => temp(4).txt
+     */
     public static File createFileRenameIfExists(String path){
         File file = new File(path);
         return createFileRenameIfExists(file);
     }
 
+    /**
+     * @param file
+     * @return  <code>File</code>  The created file, if execute successfully;
+     *          The file will be renamed if it already exists, for example:
+     *          temp.txt => temp(1).txt
+     *          temp(3).txt => temp(4).txt
+     */
     public static File createFileRenameIfExists(File file) {
         try {
             return createFile(file, CreateFileOption.RenameIfExists);
@@ -135,11 +149,21 @@ public class FileUtil {
         }
     }
 
+    /**
+     * @param path
+     * @return  <code>File</code>  The created file, if it does not exist;
+     *          The old file if it already exists.
+     */
     public static File createFileAccessIfExists(String path){
         File file = new File(path);
         return createFileAccessIfExists(file);
     }
 
+    /**
+     * @param file
+     * @return  <code>File</code>  The created file, if it does not exist;
+     *          The old file if it already exists.
+     */
     public static File createFileAccessIfExists(File file) {
         try {
             return createFile(file, CreateFileOption.AccessIfExists);
@@ -148,11 +172,22 @@ public class FileUtil {
             return null;
         }
     }
+
+    /**
+     * @param path
+     * @return  <code>File</code>  The created file, if execute successfully;
+     *          If the file already exists, this method will overwrite the old file.
+     */
     public static File createFileOverwriteIfExists(String path){
         File file = new File(path);
         return createFileOverwriteIfExists(file);
     }
 
+    /**
+     * @param file
+     * @return  <code>File</code>  The created file, if execute successfully;
+     *          If the file already exists, this method will overwrite the old file.
+     */
     public static File createFileOverwriteIfExists(File file) {
         try {
             return createFile(file, CreateFileOption.OverwriteIfExists);
@@ -162,18 +197,42 @@ public class FileUtil {
         }
     }
 
+    /**
+     * Judge whether the file exists and whether it is a directory.
+     * @param path
+     * @return <code>true</code> if the file exists and is a directory.
+     *         Otherwise, return <code>false</code>.
+     */
     public static boolean directoryExists(String path){
         return directoryExists(new File(path));
     }
 
+    /**
+     * Judge whether the file exists and whether it is a directory.
+     * @param file
+     * @return <code>true</code> if the file exists and is a directory.
+     *         Otherwise, return <code>false</code>.
+     */
     public static boolean directoryExists(File file) {
         return file.exists() && file.isDirectory();
     }
 
+    /**
+     * Judge whether the file exists and whether it is a file.
+     * @param path
+     * @return <code>true</code> if the file exists and is a file.
+     *         Otherwise, return <code>false</code>.
+     */
     public static boolean fileExists(String path){
         return fileExists(new File(path));
     }
 
+    /**
+     * Judge whether the file exists and whether it is a file.
+     * @param file
+     * @return <code>true</code> if the file exists and is a file.
+     *         Otherwise, return <code>false</code>.
+     */
     public static boolean fileExists(File file) {
         return file.exists() && file.isFile();
     }
