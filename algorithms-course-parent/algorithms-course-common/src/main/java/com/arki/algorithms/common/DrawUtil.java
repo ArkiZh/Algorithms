@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
@@ -72,17 +74,12 @@ public class DrawUtil {
 //        }
 //        drawHistogram(list);
         Pen pen = new Pen();
-        pen.setCanvas(500, 500, Color.WHITE);
-        pen.setXrange(0, 100);
-        pen.setYrange(0, 100);
-        pen.setPenRadius(10);
-        pen.setPenColor(Color.BLACK);
-        pen.point(0, 0);
+        pen.setCanvas(500, 500);
+        pen.setXrange(0, 1000);
+        pen.setYrange(0, 1000);
         pen.setPenRadius(1);
-        pen.fillCircle(50,50,250);
-//        StdDraw.setCanvasSize(500, 500);
-//        StdDraw.rectangle(0, 0, 0.5, 0.5);
 
+        pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
     }
 
 
@@ -100,6 +97,8 @@ public class DrawUtil {
         /***************************************************************************
          *  Parameters.
          ***************************************************************************/
+        // Show draw immediately or wait until next show.
+        private boolean displayDefer = false;
         // Canvas size in pixel.
         private int width = 500;
         private int height = 309;
@@ -109,8 +108,11 @@ public class DrawUtil {
         private double ymin = 0;
         private double ymax = 1;
         // Style.
-        private Color backgroundColor = Color.WHITE;
-        private Color penColor = Color.BLACK;
+        private Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+        private Color DEFAULT_PEN_COLOR = Color.BLACK;
+
+        private Color backgroundColor = DEFAULT_BACKGROUND_COLOR;
+        private Color penColor = DEFAULT_PEN_COLOR;
         private double penRadius = 1;
         // Coordinate system. WCS, world coordinate system. UCS, user coordinate system.
         private final double xWorldOrigin = 0;
@@ -132,6 +134,7 @@ public class DrawUtil {
             graphics = bufferedImage.createGraphics();
             graphics.setColor(backgroundColor);
             graphics.fillRect(0,0,width,height);
+            setPenColor(DEFAULT_PEN_COLOR);
             show();
 
             // add antialiasing
@@ -164,18 +167,43 @@ public class DrawUtil {
             this.backgroundColor=backgroundColor;
             init();
         }
+        public void setCanvas(int canvasWidth, int canvasHeight){
+            setCanvas(canvasWidth,canvasHeight,DEFAULT_BACKGROUND_COLOR);
+        }
         public void setPenColor(Color color){
             penColor = color;
             graphics.setColor(color);
         }
+
+        /**
+         * Set the pen line width in pixel unit.
+         * @param radius
+         */
         public void setPenRadius(double radius){
             penRadius = radius;
             BasicStroke basicStroke = new BasicStroke((float)radius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             graphics.setStroke(basicStroke);
         }
+        private void draw(){
+            if(!displayDefer) show();
+        }
         private void show(){
             graphics.drawImage(bufferedImage, 0, 0, null);
             frame.repaint();
+        }
+
+        /**
+         * Show draw until next show.
+         */
+        public void enableDisplayDefer(){
+            displayDefer = true;
+        }
+
+        /**
+         * Show draw immediately.
+         */
+        public void disableDisplayDefer(){
+            displayDefer = false;
         }
         private JMenuBar createMenuBar(){
             JMenuBar menuBar = new JMenuBar();
@@ -193,11 +221,25 @@ public class DrawUtil {
         /***************************************************************************
          *   Coordinate system transfer between user and screen.
          ***************************************************************************/
+
         private double transferWorldToScreenX(double x){ return width * (x + xWorldOrigin - xmin) / (xmax - xmin);}
         private double transferWorldToScreenY(double y){ return height * (ymax + yWorldOrigin - y) / (ymax - ymin);}
         private double transferUserToScreenX(double x){ return width * (x + xUserOrigin - xmin) / (xmax - xmin);}
         private double transferUserToScreenY(double y){ return height * (ymax + yUserOrigin - y) / (ymax - ymin);}
-        private double scaleUserToScreenX(double x){return 0;}// TODO
+
+        /**
+         * Transfer width from user coordinate system to screen coordinate system in x-orientation.
+         * @param w
+         * @return
+         */
+        private double factorX(double w){ return width * w / Math.abs(xmax-xmin);}
+
+        /**
+         * Transfer height from user coordinate system to screen coordinate system in y-orientation.
+         * @param h
+         * @return
+         */
+        private double factorY(double h){ return height * h / Math.abs(xmax-xmin);}
 
         public void setXrange(int xmin, int xmax){
             this.xmin = xmin;
@@ -267,27 +309,83 @@ public class DrawUtil {
          *   Geometric drawing method start
          ***************************************************************************/
 
-        private void pixel(double x, double y) {
+        public Pen pixel(double x, double y) {
             graphics.fillRect((int) Math.round(transferUserToScreenX(x)), (int) Math.round(transferUserToScreenY(y)), 1, 1);
+            draw();
+            return this;
         }
 
-        public void point(double x, double y) {
+        public Pen point(double x, double y) {
             if(penRadius <= 1) pixel(x, y);
             else{
-                graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - penRadius / 2, transferWorldToScreenY(y) - penRadius / 2, penRadius, penRadius));
+                graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - penRadius / 2, transferUserToScreenY(y) - penRadius / 2, penRadius, penRadius));
             }
-            show();
+            draw();
+            return this;
         }
 
-        public void circle(double x, double y, double radius) {
-            graphics.draw(new Ellipse2D.Double(transferUserToScreenX(x) - radius, transferUserToScreenY(y) - radius, radius * 2, radius * 2));
-            show();
+        public Pen line(double x1, double y1, double x2, double y2) {
+            graphics.draw(new Line2D.Double(transferUserToScreenX(x1), transferUserToScreenY(y1), transferUserToScreenX(x2), transferUserToScreenY(y2)));
+            draw();
+            return this;
         }
 
-        public void fillCircle(double x, double y, double radius) {
-            graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - radius, transferUserToScreenY(y) - radius, radius * 2, radius * 2));
-            show();
+        /**
+         * Draw a rectangle. Specify the left-bottom point, width and height.
+         * @param x x-coordinate of the left-bottom point.
+         * @param y y-coordinate of the left-bottom point.
+         * @param width
+         * @param height
+         * @return
+         */
+        public Pen rectangle(double x, double y, double width, double height) {
+            double w = factorX(width);
+            double h = factorY(height);
+            graphics.draw(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
+            draw();
+            return this;
         }
+
+        /**
+         * Draw a color-filled rectangle. Specify the left-bottom point, width and height.
+         * @param x x-coordinate of the left-bottom point.
+         * @param y y-coordinate of the left-bottom point.
+         * @param width
+         * @param height
+         * @return
+         */
+        public Pen fillRectangle(double x, double y, double width, double height) {
+            double w = factorX(width);
+            double h = factorY(height);
+            graphics.fill(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
+            draw();
+            return this;
+        }
+
+        public Pen ellipse(double x, double y, double xSemiAxis, double ySemiAxis) {
+            double w = factorX(xSemiAxis);
+            double h = factorY(ySemiAxis);
+            graphics.draw(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
+            draw();
+            return this;
+        }
+
+        public Pen fillEllipse(double x, double y, double xSemiAxis, double ySemiAxis) {
+            double w = factorX(xSemiAxis);
+            double h = factorY(ySemiAxis);
+            graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
+            draw();
+            return this;
+        }
+
+        public Pen circle(double x, double y, double radius) {
+            return ellipse(x, y, radius, radius);
+        }
+
+        public Pen fillCircle(double x, double y, double radius) {
+            return fillEllipse(x, y, radius, radius);
+        }
+
 
 
 
