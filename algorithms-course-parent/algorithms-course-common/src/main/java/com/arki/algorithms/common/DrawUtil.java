@@ -12,6 +12,7 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DrawUtil {
@@ -25,61 +26,40 @@ public class DrawUtil {
             max = temp > max ? temp : max;
         }
 
+        Pen pen = new Pen();
         int canvasWidth = 500;
         int canvasHeight = 309;
-        StdDraw.setCanvasSize(canvasWidth,canvasHeight);
-        double xScale = size * 1.2;
-        double yScale = max * 1.2;
-        StdDraw.setXscale(0, xScale);
-        StdDraw.setYscale(0, yScale);
+        pen.setCanvas(canvasWidth,canvasHeight);
+        double xmax = list.size() * 1.2;
+        double ymax = max * 1.2;
+        pen.setXrange(0, xmax);
+        pen.setYrange(0, ymax);
+        pen.setUserOrigin(0.1 * list.size(), 0.1 * max);
+        pen.setPenColor(Color.red);
+        pen.rectangle(-0.05 * list.size(), 0, list.size() * 1.05, max * 1.05);
+        pen.setPenColor(Color.BLACK);
 
-        StdDraw.setPenColor(StdDraw.PRINCETON_ORANGE);
-
-        StdDraw.setPenColor(StdDraw.BOOK_BLUE);
         double interval = 1;
-        double halfWidth = interval * 0.25;
+        double width = interval/2;
         for (int i = 0; i < list.size(); i++) {
-            double y = list.get(i).doubleValue();
-            StdDraw.filledRectangle(interval * i + halfWidth, y / 2, halfWidth, y / 2);
+            pen.fillRectangle(interval * i, 0, width, list.get(i).doubleValue());
         }
     }
 
-
-    /**
-     * Draw rectangle by specifying the left-bottom vertex, width, and height.
-     * @param x x-coordinate of the left-bottom vertex.
-     * @param y y-coordinate of the left-bottom vertex.
-     * @param width
-     * @param height
-     */
-    public static void rectangleByVertex(double x, double y, double width, double height) {
-        StdDraw.rectangle(x + width / 2, y + height / 2, width / 2, height / 2);
-    }
-
-    /**
-     * Draw filled rectangle by specifying the left-bottom vertex, width, and height.
-     * @param x x-coordinate of the left-bottom vertex.
-     * @param y y-coordinate of the left-bottom vertex.
-     * @param width
-     * @param height
-     */
-    public static void filledRectangleByVertex(double x, double y, double width, double height) {
-        StdDraw.filledRectangle(x + width / 2, y + height / 2, width / 2, height / 2);
-    }
-
     public static void main(String[] args) {
-//        ArrayList<Integer> list = new ArrayList<>();
-//        for (int i = 0; i < 10; i++) {
-//            list.add(i);
-//        }
-//        drawHistogram(list);
-        Pen pen = new Pen();
-        pen.setCanvas(500, 500);
-        pen.setXrange(0, 1000);
-        pen.setYrange(0, 1000);
-        pen.setPenRadius(1);
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            list.add(i+10);
+        }
+        drawHistogram(list);
 
-        pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
+//        Pen pen = new Pen();
+//        pen.setCanvas(500, 500);
+//        pen.setXrange(0, 1000);
+//        pen.setYrange(0, 1000);
+//        pen.setPenRadius(1);
+//
+//        pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
     }
 
 
@@ -223,9 +203,9 @@ public class DrawUtil {
          ***************************************************************************/
 
         private double transferWorldToScreenX(double x){ return width * (x + xWorldOrigin - xmin) / (xmax - xmin);}
-        private double transferWorldToScreenY(double y){ return height * (ymax + yWorldOrigin - y) / (ymax - ymin);}
+        private double transferWorldToScreenY(double y){ return height * (ymax - yWorldOrigin - y) / (ymax - ymin);}
         private double transferUserToScreenX(double x){ return width * (x + xUserOrigin - xmin) / (xmax - xmin);}
-        private double transferUserToScreenY(double y){ return height * (ymax + yUserOrigin - y) / (ymax - ymin);}
+        private double transferUserToScreenY(double y){ return height * (ymax - yUserOrigin - y) / (ymax - ymin);}
 
         /**
          * Transfer width from user coordinate system to screen coordinate system in x-orientation.
@@ -239,16 +219,21 @@ public class DrawUtil {
          * @param h
          * @return
          */
-        private double factorY(double h){ return height * h / Math.abs(xmax-xmin);}
+        private double factorY(double h){ return height * h / Math.abs(ymax-ymin);}
 
-        public void setXrange(int xmin, int xmax){
+        public void setXrange(double xmin, double xmax){
             this.xmin = xmin;
             this.xmax = xmax;
         };
-        public void setYrange(int ymin, int ymax){
+        public void setYrange(double ymin, double ymax){
             this.ymin = ymin;
             this.ymax = ymax;
         };
+
+        public void setUserOrigin(double x,double y){
+            xUserOrigin = x;
+            yUserOrigin = y;
+        }
 
 
         /***************************************************************************
@@ -360,6 +345,27 @@ public class DrawUtil {
             graphics.fill(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
             draw();
             return this;
+        }
+
+        /**
+         * Draw a square. Specify the left-bottom point, width and height.
+         * @param x x-coordinate of the left-bottom point.
+         * @param y y-coordinate of the left-bottom point.
+         * @param edgeLength
+         * @return
+         */
+        public Pen square(double x, double y, double edgeLength) {
+            return rectangle(x, y, edgeLength, edgeLength);
+        }
+        /**
+         * Draw a color-filled square. Specify the left-bottom point, width and height.
+         * @param x x-coordinate of the left-bottom point.
+         * @param y y-coordinate of the left-bottom point.
+         * @param edgeLength
+         * @return
+         */
+        public Pen fillSquare(double x, double y, double edgeLength) {
+            return fillRectangle(x, y, edgeLength, edgeLength);
         }
 
         public Pen ellipse(double x, double y, double xSemiAxis, double ySemiAxis) {
