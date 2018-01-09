@@ -17,41 +17,47 @@ import java.util.List;
 
 public class DrawUtil {
 
-    public static void drawHistogram(List<? extends Number> list){
+    public static Pen drawHistogram(List<? extends Number> list){
 
-        int size = list.size();
+        int N = list.size();
         double max = 0;
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < N; i++) {
             double temp = list.get(i).doubleValue();
             max = temp > max ? temp : max;
         }
 
         Pen pen = new Pen();
-        int canvasWidth = 500;
-        int canvasHeight = 309;
-        pen.setCanvas(canvasWidth,canvasHeight);
-        double xmax = list.size() * 1.2;
-        double ymax = max * 1.2;
+        double leftMargin = (N + 2) * 0.1;
+        double bottomMargin = max * 0.1;
+        double topPadding = max * 0.1;
+        double xmax = leftMargin * 2 + N + 2;
+        double ymax = bottomMargin * 2 + max + topPadding;
         pen.setXrange(0, xmax);
         pen.setYrange(0, ymax);
-        pen.setUserOrigin(0.1 * list.size(), 0.1 * max);
-        pen.setPenColor(Color.red);
-        pen.rectangle(-0.05 * list.size(), 0, list.size() * 1.05, max * 1.05);
-        pen.setPenColor(Color.BLACK);
+        pen.setPenColor(Color.LIGHT_GRAY);
+
+        pen.fillRectangle(leftMargin, bottomMargin, N + 2, max + topPadding);
+        pen.setUserOrigin(leftMargin + 1, bottomMargin);
+        pen.resetPenColor();
 
         double interval = 1;
         double width = interval/2;
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < N; i++) {
             pen.fillRectangle(interval * i, 0, width, list.get(i).doubleValue());
         }
+        return pen;
+    }
+
+    public static Pen createPen(){
+        return new Pen();
     }
 
     public static void main(String[] args) {
         ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 16; i++) {
             list.add(i+10);
         }
-        drawHistogram(list);
+        Pen pen = drawHistogram(list);
 
 //        Pen pen = new Pen();
 //        pen.setCanvas(500, 500);
@@ -63,7 +69,7 @@ public class DrawUtil {
     }
 
 
-    private static final class Pen implements ActionListener {
+    public static final class Pen implements ActionListener {
 
 
         /***************************************************************************
@@ -80,25 +86,35 @@ public class DrawUtil {
         // Show draw immediately or wait until next show.
         private boolean displayDefer = false;
         // Canvas size in pixel.
-        private int width = 500;
-        private int height = 309;
+        private final int DEFAULT_WIDTH = 500;
+        private final int DEFAULT_HEIGHT = 309;
+        private int width = DEFAULT_WIDTH;
+        private int height = DEFAULT_HEIGHT;
         // The region for drawing. It will be mapped to screen coordinate system.
-        private double xmin = 0;
-        private double xmax = 1;
-        private double ymin = 0;
-        private double ymax = 1;
+        private final double DEFAULT_XMIN = 0;
+        private final double DEFAULT_XMAX = 1;
+        private final double DEFAULT_YMIN = 0;
+        private final double DEFAULT_YMAX = 1;
+        private double xmin = DEFAULT_XMIN;
+        private double xmax = DEFAULT_XMAX;
+        private double ymin = DEFAULT_YMIN;
+        private double ymax = DEFAULT_YMAX;
         // Style.
-        private Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
-        private Color DEFAULT_PEN_COLOR = Color.BLACK;
-
+        private final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+        private final Color DEFAULT_PEN_COLOR = Color.BLACK;
+        private final double DEFAULT_PEN_RADIUS = 1;
         private Color backgroundColor = DEFAULT_BACKGROUND_COLOR;
         private Color penColor = DEFAULT_PEN_COLOR;
-        private double penRadius = 1;
+        private double penRadius = DEFAULT_PEN_RADIUS;
         // Coordinate system. WCS, world coordinate system. UCS, user coordinate system.
-        private final double xWorldOrigin = 0;
-        private final double yWorldOrigin = 0;
-        private double xUserOrigin = 0;
-        private double yUserOrigin = 0;
+        private final double DEFAULT_X_WORLD_ORIGIN = 0;
+        private final double DEFAULT_Y_WORLD_ORIGIN = 0;
+        private final double DEFAULT_X_USER_ORIGIN = 0;
+        private final double DEFAULT_Y_USER_ORIGIN = 0;
+        private double xWorldOrigin = DEFAULT_X_WORLD_ORIGIN;
+        private double yWorldOrigin = DEFAULT_Y_WORLD_ORIGIN;
+        private double xUserOrigin = DEFAULT_X_USER_ORIGIN;
+        private double yUserOrigin = DEFAULT_Y_USER_ORIGIN;
 
 
         /***************************************************************************
@@ -154,6 +170,9 @@ public class DrawUtil {
             penColor = color;
             graphics.setColor(color);
         }
+        public void resetPenColor(){
+           setPenColor(DEFAULT_PEN_COLOR);
+        }
 
         /**
          * Set the pen line width in pixel unit.
@@ -163,6 +182,9 @@ public class DrawUtil {
             penRadius = radius;
             BasicStroke basicStroke = new BasicStroke((float)radius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             graphics.setStroke(basicStroke);
+        }
+        public void resetPenRadius(){
+            setPenRadius(DEFAULT_PEN_RADIUS);
         }
         private void draw(){
             if(!displayDefer) show();
