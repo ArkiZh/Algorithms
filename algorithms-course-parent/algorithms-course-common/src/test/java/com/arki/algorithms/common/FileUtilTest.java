@@ -10,12 +10,9 @@ public class FileUtilTest {
 
     @Test
     public void testCreateFile(){
-        File file = FileUtil.createFile("temp/temp.txt");
-        file.delete();
-        Logger.info("File deleted. File name: [{}]",file.getAbsolutePath());
-        File file1 = new File("temp");
-        file1.delete();
-        Logger.info("File deleted. File name: [{}]",file1.getAbsolutePath());
+        File file = FileUtil.createFileOnlyNew("temp/temp.txt");
+        FileUtil.deleteFile(file);
+        FileUtil.deleteFile(new File("temp"));
     }
 
     @Test
@@ -27,22 +24,20 @@ public class FileUtilTest {
         }
         files.add(new File("temp"));
         for(File file: files){
-            file.delete();
-            Logger.info("File deleted. File name: [{}]",file.getAbsolutePath());
+            FileUtil.deleteFile(file);
         }
     }
 
     @Test
     public void testCreateFileOverwriteIfExists(){
+        ArrayList<File> files = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            FileUtil.createFileOverwriteIfExists("temp/temp.txt");
+            files.add(FileUtil.createFileOverwriteIfExists("temp/temp.txt"));
         }
-        File file = new File("temp/temp.txt");
-        file.delete();
-        Logger.info("File deleted. File name: [{}]",file.getAbsolutePath());
-        File file1 = new File("temp");
-        file1.delete();
-        Logger.info("File deleted. File name: [{}]",file1.getAbsolutePath());
+        files.add(new File("temp"));
+        for(File file: files){
+            FileUtil.deleteFile(file);
+        }
     }
 
 }

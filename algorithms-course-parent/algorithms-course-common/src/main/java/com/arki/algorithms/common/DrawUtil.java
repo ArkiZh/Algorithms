@@ -261,40 +261,37 @@ public class DrawUtil {
         /***************************************************************************
          *  Save drawing to a file.
          ***************************************************************************/
-        public void save(String fileName){
+        public File save(String fileName){
             if (fileName == null) throw new IllegalArgumentException();
             File file = new File(fileName);
             String suffix = fileName.substring(fileName.lastIndexOf('.') + 1);
 
-            // png files
-            if ("png".equalsIgnoreCase(suffix)) {
-                try {
+            try {
+                if ("png".equalsIgnoreCase(suffix)) {
+                    // png files
                     ImageIO.write(bufferedImage, suffix, file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // need to change from ARGB to RGB for JPEG
-            // reference: http://archives.java.sun.com/cgi-bin/wa?A2=ind0404&L=java2d-interest&D=0&P=2727
-            else if ("jpg".equalsIgnoreCase(suffix)) {
-                WritableRaster raster = bufferedImage.getRaster();
-                WritableRaster newRaster;
-                newRaster = raster.createWritableChild(0, 0, width, height, 0, 0, new int[]{0, 1, 2});
-                DirectColorModel cm = (DirectColorModel) bufferedImage.getColorModel();
-                DirectColorModel newCM = new DirectColorModel(cm.getPixelSize(),
-                        cm.getRedMask(),
-                        cm.getGreenMask(),
-                        cm.getBlueMask());
-                BufferedImage rgbBuffer = new BufferedImage(newCM, newRaster, false, null);
-                try {
+                } else if ("jpg".equalsIgnoreCase(suffix)) {
+                    // need to change from ARGB to RGB for JPEG
+                    // reference: http://archives.java.sun.com/cgi-bin/wa?A2=ind0404&L=java2d-interest&D=0&P=2727
+                    WritableRaster raster = bufferedImage.getRaster();
+                    WritableRaster newRaster;
+                    newRaster = raster.createWritableChild(0, 0, width, height, 0, 0, new int[]{0, 1, 2});
+                    DirectColorModel cm = (DirectColorModel) bufferedImage.getColorModel();
+                    DirectColorModel newCM = new DirectColorModel(cm.getPixelSize(),
+                            cm.getRedMask(),
+                            cm.getGreenMask(),
+                            cm.getBlueMask());
+                    BufferedImage rgbBuffer = new BufferedImage(newCM, newRaster, false, null);
                     ImageIO.write(rgbBuffer, suffix, file);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } else {
+                    file = null;
+                    System.out.println("Invalid image file type: " + suffix);
                 }
-            } else {
-                System.out.println("Invalid image file type: " + suffix);
+            } catch (IOException e) {
+                file = null;
+                e.printStackTrace();
             }
+            return file;
         }
 
         /**

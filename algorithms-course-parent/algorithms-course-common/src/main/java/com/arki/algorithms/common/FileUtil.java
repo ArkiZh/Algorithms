@@ -30,6 +30,7 @@ public class FileUtil {
 
     }
 
+
     /**
      *
      * @param file
@@ -39,28 +40,29 @@ public class FileUtil {
      * @throws IOException
      */
     private static File createFile(File file,CreateFileOption option) throws IOException {
+        String path = getCanonicalPath(file);
         if(fileExists(file)){
             switch (option) {
                 case OnlyNew:
-                    Logger.info("File already exists, stop creating it. File name: [{}]", file.getCanonicalPath());
+                    Logger.info("File already exists, stop creating it. File name: [{}]", path);
                     return null;
                 case AccessIfExists:
-                    Logger.info("File already exists, access it. File name: [{}]", file.getCanonicalPath());
+                    Logger.info("File already exists, access it. File name: [{}]", path);
                     return file;
                 case OverwriteIfExists:
                     file.delete();
                     file.createNewFile();
-                    Logger.info("Overwrite file. File name: [{}]", file.getCanonicalPath());
+                    Logger.info("Overwrite file. File name: [{}]", path);
                     return file;
                 case RenameIfExists:
                     return createFile(renamedFile(file), option);
             }
         }else if(file.getParentFile()!=null && !directoryExists(file.getParentFile())){
             file.getParentFile().mkdirs();
-            Logger.info("Directory created. Directory name: [{}]",file.getParentFile().getCanonicalPath());
+            Logger.info("Directory created. Directory name: [{}]",getCanonicalPath(file.getParentFile()));
         }
         file.createNewFile();
-        Logger.info("File created. File name: [{}]",file.getCanonicalPath());
+        Logger.info("File created. File name: [{}]",path);
         return file;
     }
 
@@ -74,12 +76,7 @@ public class FileUtil {
      * @return The new renamed file.
      */
     private static File renamedFile(File file){
-        String cPath = file.getAbsolutePath();
-        try {
-            cPath = file.getCanonicalPath();
-        } catch (IOException e) {
-            Logger.error(null, e);
-        }
+        String cPath = getCanonicalPath(file);
         int i = cPath.lastIndexOf(fileSeparator);
         String parentPath = cPath.substring(0, i);
         String fileName = cPath.substring(i);
@@ -102,9 +99,9 @@ public class FileUtil {
      * @return  <code>File</code> if the named file does not exist and was successfully created;
      *          <code>null</code> if the named file already exists or if IOException, SecurityException occur.
      */
-    public static File createFile(String path) {
+    public static File createFileOnlyNew(String path) {
         File file = new File(path);
-        return createFile(file);
+        return createFileOnlyNew(file);
     }
 
     /**
@@ -112,7 +109,7 @@ public class FileUtil {
      * @return  <code>File</code> if the file does not exist and was successfully created;
      *          <code>null</code> if the file already exists or if IOException, SecurityException occur.
      */
-    public static File createFile(File file) {
+    public static File createFileOnlyNew(File file) {
         try {
             return createFile(file, CreateFileOption.OnlyNew);
         } catch (IOException | SecurityException e) {
@@ -237,18 +234,73 @@ public class FileUtil {
         return file.exists() && file.isFile();
     }
 
+    /**
+     * Delete the file (directory included).
+     * @param file
+     * @return <code>true</code> The file exists and is deleted successfully.
+     *          <code>false</code> otherwise.
+     */
+    public static boolean deleteFile(File file) {
+        String path = getCanonicalPath(file);
+        if (!file.exists()) {
+            Logger.info("File not exist. Path: [{}]", path);
+            return false;
+        }
+        String type = file.isDirectory() ? "directory" : file.isFile() ? "file" : "unknownType";
+        //Logger.info("Delete {} start...   Path: [{}]", type, path);
+        boolean result = false;
+        if (file.isFile()) {
+            result = file.delete();
+        } else if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                deleteFile(files[i]);
+            }
+            result = file.delete();
+        } else {
+            Logger.info("Skip this {}. Path: [{}]", type, path);
+        }
+        Logger.info("Delete {}: [{}]   Path: [{}]", type, result ? "Success" : "Failed", path);
+        return result;
+    }
 
-    public static void main(String[] args) throws IOException {
-        File file = new File("tempFile" + fileSeparator + "temp");
-        Logger.info("Is directory? [{}]",file.isDirectory());
-        Logger.info("Is file? [{}]",file.isFile());
-        Logger.info("Parent: " + file.getParent());
-        Logger.info("Parent absolute path: " + file.getParentFile().getAbsolutePath());
-        Logger.info("Parent absolute path: " + file.getParentFile().exists());
+    /**
+     * Delete the file (directory included).
+     * @param path
+     * @return <code>true</code> The file exists and is deleted successfully.
+     *          <code>false</code> otherwise.
+     */
+    public static boolean deleteFile(String path) {
+        return deleteFile(new File(path));
+    }
 
-        Logger.info("Path: " + file.getPath());
-        Logger.info("Absolute path: " + file.getAbsolutePath());
-        Logger.info("Canonical path: " + file.getCanonicalPath());
+    public static boolean directoryEmpty(File directory){
+        if(directoryExists(directory)){
+            String[] list = directory.list();
+            return list.length == 0;
+        }
+        return false;
+    }
+
+
+    /**
+     * Get the canonical path of a file.
+     * @param file
+     * @return the canonical path.
+     *          If <code>IOException</code> occurs, the absolute path will be returned instead.
+     */
+    public static String getCanonicalPath(File file) {
+        try {
+            return file.getCanonicalPath();
+        } catch (IOException e) {
+            Logger.error(null, e);
+            return file.getAbsolutePath();
+        }
+    }
+
+    public static void main(String[] args) {
+        File file = createFileOnlyNew("temp" + fileSeparator + "hello" + fileSeparator + "world.temp");
+        deleteFile("temp");
     }
 
 }
