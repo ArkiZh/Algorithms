@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -12,6 +13,8 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,19 +56,27 @@ public class DrawUtil {
     }
 
     public static void main(String[] args) {
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            list.add(i+10);
-        }
-        Pen pen = drawHistogram(list);
+//        ArrayList<Integer> list = new ArrayList<>();
+//        for (int i = 0; i < 16; i++) {
+//            list.add(i+10);
+//        }
+//        Pen pen = drawHistogram(list);
 
-//        Pen pen = new Pen();
-//        pen.setCanvas(500, 500);
-//        pen.setXrange(0, 1000);
-//        pen.setYrange(0, 1000);
-//        pen.setPenRadius(1);
-//
-//        pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
+        Pen pen = new Pen();
+        pen.enableDisplayDefer();
+        pen.setCanvas(500, 500);
+        pen.setXrange(0, 1000);
+        pen.setYrange(0, 1000);
+        pen.setPenRadius(1);
+        for (int i = 0; i < 180; i++) {
+            pen.clear(Color.LIGHT_GRAY);
+            pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
+            pen.show();
+            pen.pause(250);
+            pen.clear(Color.blue);
+            pen.show();
+            pen.pause(250);
+        }
     }
 
 
@@ -76,8 +87,10 @@ public class DrawUtil {
          *  Components.
          ***************************************************************************/
         private JFrame frame;
-        private BufferedImage bufferedImage;
-        private Graphics2D graphics;
+        private BufferedImage bufferedImageHidden;
+        private Graphics2D graphicsHidden;
+        private BufferedImage bufferedImageVisible;
+        private Graphics2D graphicsVisible;
 
 
         /***************************************************************************
@@ -106,6 +119,8 @@ public class DrawUtil {
         private Color backgroundColor = DEFAULT_BACKGROUND_COLOR;
         private Color penColor = DEFAULT_PEN_COLOR;
         private double penRadius = DEFAULT_PEN_RADIUS;
+        private Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 16);
+        private Font font = DEFAULT_FONT;
         // Coordinate system. WCS, world coordinate system. UCS, user coordinate system.
         private final double DEFAULT_X_WORLD_ORIGIN = 0;
         private final double DEFAULT_Y_WORLD_ORIGIN = 0;
@@ -126,21 +141,20 @@ public class DrawUtil {
         private void init(){
             if (frame != null) frame.setVisible(false);
             frame = new JFrame();
-            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            graphics = bufferedImage.createGraphics();
-            graphics.setColor(backgroundColor);
-            graphics.fillRect(0,0,width,height);
-            setPenColor(DEFAULT_PEN_COLOR);
-            show();
+            bufferedImageVisible = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            graphicsVisible = bufferedImageVisible.createGraphics();
+            bufferedImageHidden = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            graphicsHidden = bufferedImageHidden.createGraphics();
+            clear();
 
             // add antialiasing
             RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            graphics.addRenderingHints(hints);
+            graphicsHidden.addRenderingHints(hints);
 
             // frame stuff
-            ImageIcon icon = new ImageIcon(bufferedImage);
+            ImageIcon icon = new ImageIcon(bufferedImageVisible);
             JLabel draw = new JLabel(icon);
 
             frame.setContentPane(draw);
@@ -166,9 +180,22 @@ public class DrawUtil {
         public void setCanvas(int canvasWidth, int canvasHeight){
             setCanvas(canvasWidth,canvasHeight,DEFAULT_BACKGROUND_COLOR);
         }
+
+        public void clear(Color color) {
+            backgroundColor = color;
+            graphicsHidden.setColor(color);
+            graphicsHidden.fillRect(0,0,width,height);
+            setPenColor(DEFAULT_PEN_COLOR);
+            draw();
+        }
+        public void clear() {
+            clear(DEFAULT_BACKGROUND_COLOR);
+        }
+
+
         public void setPenColor(Color color){
             penColor = color;
-            graphics.setColor(color);
+            graphicsHidden.setColor(color);
         }
         public void resetPenColor(){
            setPenColor(DEFAULT_PEN_COLOR);
@@ -181,7 +208,7 @@ public class DrawUtil {
         public void setPenRadius(double radius){
             penRadius = radius;
             BasicStroke basicStroke = new BasicStroke((float)radius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            graphics.setStroke(basicStroke);
+            graphicsHidden.setStroke(basicStroke);
         }
         public void resetPenRadius(){
             setPenRadius(DEFAULT_PEN_RADIUS);
@@ -190,7 +217,7 @@ public class DrawUtil {
             if(!displayDefer) show();
         }
         private void show(){
-            graphics.drawImage(bufferedImage, 0, 0, null);
+            graphicsVisible.drawImage(bufferedImageHidden, 0, 0, null);
             frame.repaint();
         }
 
@@ -207,6 +234,16 @@ public class DrawUtil {
         public void disableDisplayDefer(){
             displayDefer = false;
         }
+
+        public void pause(int milliseconds){
+            try {
+                Thread.sleep(milliseconds);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         private JMenuBar createMenuBar(){
             JMenuBar menuBar = new JMenuBar();
             JMenu menu = new JMenu("File");
@@ -269,14 +306,14 @@ public class DrawUtil {
             try {
                 if ("png".equalsIgnoreCase(suffix)) {
                     // png files
-                    ImageIO.write(bufferedImage, suffix, file);
+                    ImageIO.write(bufferedImageHidden, suffix, file);
                 } else if ("jpg".equalsIgnoreCase(suffix)) {
                     // need to change from ARGB to RGB for JPEG
                     // reference: http://archives.java.sun.com/cgi-bin/wa?A2=ind0404&L=java2d-interest&D=0&P=2727
-                    WritableRaster raster = bufferedImage.getRaster();
+                    WritableRaster raster = bufferedImageHidden.getRaster();
                     WritableRaster newRaster;
                     newRaster = raster.createWritableChild(0, 0, width, height, 0, 0, new int[]{0, 1, 2});
-                    DirectColorModel cm = (DirectColorModel) bufferedImage.getColorModel();
+                    DirectColorModel cm = (DirectColorModel) bufferedImageHidden.getColorModel();
                     DirectColorModel newCM = new DirectColorModel(cm.getPixelSize(),
                             cm.getRedMask(),
                             cm.getGreenMask(),
@@ -314,7 +351,7 @@ public class DrawUtil {
          ***************************************************************************/
 
         public Pen pixel(double x, double y) {
-            graphics.fillRect((int) Math.round(transferUserToScreenX(x)), (int) Math.round(transferUserToScreenY(y)), 1, 1);
+            graphicsHidden.fillRect((int) Math.round(transferUserToScreenX(x)), (int) Math.round(transferUserToScreenY(y)), 1, 1);
             draw();
             return this;
         }
@@ -322,14 +359,14 @@ public class DrawUtil {
         public Pen point(double x, double y) {
             if(penRadius <= 1) pixel(x, y);
             else{
-                graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - penRadius / 2, transferUserToScreenY(y) - penRadius / 2, penRadius, penRadius));
+                graphicsHidden.fill(new Ellipse2D.Double(transferUserToScreenX(x) - penRadius / 2, transferUserToScreenY(y) - penRadius / 2, penRadius, penRadius));
             }
             draw();
             return this;
         }
 
         public Pen line(double x1, double y1, double x2, double y2) {
-            graphics.draw(new Line2D.Double(transferUserToScreenX(x1), transferUserToScreenY(y1), transferUserToScreenX(x2), transferUserToScreenY(y2)));
+            graphicsHidden.draw(new Line2D.Double(transferUserToScreenX(x1), transferUserToScreenY(y1), transferUserToScreenX(x2), transferUserToScreenY(y2)));
             draw();
             return this;
         }
@@ -345,7 +382,7 @@ public class DrawUtil {
         public Pen rectangle(double x, double y, double width, double height) {
             double w = factorX(width);
             double h = factorY(height);
-            graphics.draw(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
+            graphicsHidden.draw(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
             draw();
             return this;
         }
@@ -361,7 +398,7 @@ public class DrawUtil {
         public Pen fillRectangle(double x, double y, double width, double height) {
             double w = factorX(width);
             double h = factorY(height);
-            graphics.fill(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
+            graphicsHidden.fill(new Rectangle2D.Double(transferUserToScreenX(x), transferUserToScreenY(y) - h, w, h));
             draw();
             return this;
         }
@@ -387,10 +424,69 @@ public class DrawUtil {
             return fillRectangle(x, y, edgeLength, edgeLength);
         }
 
+        /**
+         * Draws a polygon with the vertices
+         * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
+         * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
+         * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
+         *
+         * @param  x an array of all the <em>x</em>-coordinates of the polygon
+         * @param  y an array of all the <em>y</em>-coordinates of the polygon
+         * @throws IllegalArgumentException unless {@code x[]} and {@code y[]}
+         *         are of the same length
+         */
+        public  Pen polygon(double[] x, double[] y) {
+            if (x == null) throw new IllegalArgumentException("x-coordinate array is null");
+            if (y == null) throw new IllegalArgumentException("y-coordinate array is null");
+            int n1 = x.length;
+            int n2 = y.length;
+            if (n1 != n2) throw new IllegalArgumentException("arrays must be of the same length");
+            int n = n1;
+            if (n == 0) return this;
+
+            GeneralPath path = new GeneralPath();
+            path.moveTo((float) transferUserToScreenX(x[0]), (float) transferUserToScreenY(y[0]));
+            for (int i = 0; i < n; i++)
+                path.lineTo((float) transferUserToScreenX(x[i]), (float) transferUserToScreenX(y[i]));
+            path.closePath();
+            graphicsHidden.draw(path);
+            draw();
+            return this;
+        }
+
+        /**
+         * Draws a polygon with the vertices
+         * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
+         * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
+         * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
+         *
+         * @param  x an array of all the <em>x</em>-coordinates of the polygon
+         * @param  y an array of all the <em>y</em>-coordinates of the polygon
+         * @throws IllegalArgumentException unless {@code x[]} and {@code y[]}
+         *         are of the same length
+         */
+        public void fillPolygon(double[] x, double[] y) {
+            if (x == null) throw new IllegalArgumentException("x-coordinate array is null");
+            if (y == null) throw new IllegalArgumentException("y-coordinate array is null");
+            int n1 = x.length;
+            int n2 = y.length;
+            if (n1 != n2) throw new IllegalArgumentException("arrays must be of the same length");
+            int n = n1;
+            if (n == 0) return;
+
+            GeneralPath path = new GeneralPath();
+            path.moveTo((float) transferUserToScreenX(x[0]), (float) transferUserToScreenY(y[0]));
+            for (int i = 0; i < n; i++)
+                path.lineTo((float) transferUserToScreenX(x[i]), (float) transferUserToScreenX(y[i]));
+            path.closePath();
+            graphicsHidden.fill(path);
+            draw();
+        }
+
         public Pen ellipse(double x, double y, double xSemiAxis, double ySemiAxis) {
             double w = factorX(xSemiAxis);
             double h = factorY(ySemiAxis);
-            graphics.draw(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
+            graphicsHidden.draw(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
             draw();
             return this;
         }
@@ -398,7 +494,7 @@ public class DrawUtil {
         public Pen fillEllipse(double x, double y, double xSemiAxis, double ySemiAxis) {
             double w = factorX(xSemiAxis);
             double h = factorY(ySemiAxis);
-            graphics.fill(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
+            graphicsHidden.fill(new Ellipse2D.Double(transferUserToScreenX(x) - w, transferUserToScreenY(y) - h, w * 2, h * 2));
             draw();
             return this;
         }
@@ -417,8 +513,218 @@ public class DrawUtil {
 
 
         /***************************************************************************
-         *   Geometric drawing method end
+         *   Images drawing method start
          ***************************************************************************/
+
+        // get an image from the given filename
+        private Image getImage(String filename) {
+            if (filename == null) throw new IllegalArgumentException();
+
+            // to read from file
+            ImageIcon icon = new ImageIcon(filename);
+
+            // try to read from URL
+            if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+                try {
+                    URL url = new URL(filename);
+                    icon = new ImageIcon(url);
+                }
+                catch (MalformedURLException e) {
+                /* not a url */
+                }
+            }
+
+            // in case file is inside a .jar (classpath relative to StdDraw)
+            if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+                URL url = StdDraw.class.getResource(filename);
+                if (url != null)
+                    icon = new ImageIcon(url);
+            }
+
+            // in case file is inside a .jar (classpath relative to root of jar)
+            if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+                URL url = StdDraw.class.getResource("/" + filename);
+                if (url == null) throw new IllegalArgumentException("image " + filename + " not found");
+                icon = new ImageIcon(url);
+            }
+
+            return icon.getImage();
+        }
+
+        /***************************************************************************
+         * [Summer 2016] Should we update to use ImageIO instead of ImageIcon()?
+         *               Seems to have some issues loading images on some systems
+         *               and slows things down on other systems.
+         *               especially if you don't call ImageIO.setUseCache(false)
+         *               One advantage is that it returns a BufferedImage.
+         ***************************************************************************/
+/*
+    private static BufferedImage getImage(String filename) {
+        if (filename == null) throw new IllegalArgumentException();
+
+        // from a file or URL
+        try {
+            URL url = new URL(filename);
+            BufferedImage image = ImageIO.read(url);
+            return image;
+        }
+        catch (IOException e) {
+            // ignore
+        }
+
+        // in case file is inside a .jar (classpath relative to StdDraw)
+        try {
+            URL url = StdDraw.class.getResource(filename);
+            BufferedImage image = ImageIO.read(url);
+            return image;
+        }
+        catch (IOException e) {
+            // ignore
+        }
+
+        // in case file is inside a .jar (classpath relative to root of jar)
+        try {
+            URL url = StdDraw.class.getResource("/" + filename);
+            BufferedImage image = ImageIO.read(url);
+            return image;
+        }
+        catch (IOException e) {
+            // ignore
+        }
+        throw new IllegalArgumentException("image " + filename + " not found");
+    }
+*/
+        /**
+         * Draws the specified image centered at (<em>x</em>, <em>y</em>).
+         * The supported image formats are JPEG, PNG, and GIF.
+         * As an optimization, the picture is cached, so there is no performance
+         * penalty for redrawing the same image multiple times (e.g., in an animation).
+         * However, if you change the picture file after drawing it, subsequent
+         * calls will draw the original picture.
+         *
+         * @param  x the center <em>x</em>-coordinate of the image
+         * @param  y the center <em>y</em>-coordinate of the image
+         * @param  filename the name of the image/picture, e.g., "ball.gif"
+         * @throws IllegalArgumentException if the image filename is invalid
+         */
+        public Pen picture(double x, double y, String filename) {
+            // BufferedImage image = getImage(filename);
+            Image image = getImage(filename);
+            double xs = transferUserToScreenX(x);
+            double ys = transferUserToScreenY(y);
+            // int ws = image.getWidth();    // can call only if image is a BufferedImage
+            // int hs = image.getHeight();
+            int ws = image.getWidth(null);
+            int hs = image.getHeight(null);
+            if (ws < 0 || hs < 0) throw new IllegalArgumentException("image " + filename + " is corrupt");
+
+            graphicsHidden.drawImage(image, (int) Math.round(xs - ws/2.0), (int) Math.round(ys - hs/2.0), null);
+            draw();
+            return this;
+        }
+
+        /**
+         * Draws the specified image centered at (<em>x</em>, <em>y</em>),
+         * rotated given number of degrees.
+         * The supported image formats are JPEG, PNG, and GIF.
+         *
+         * @param  x the center <em>x</em>-coordinate of the image
+         * @param  y the center <em>y</em>-coordinate of the image
+         * @param  filename the name of the image/picture, e.g., "ball.gif"
+         * @param  degrees is the number of degrees to rotate counterclockwise
+         * @throws IllegalArgumentException if the image filename is invalid
+         */
+        public Pen picture(double x, double y, String filename, double degrees) {
+            // BufferedImage image = getImage(filename);
+            Image image = getImage(filename);
+            double xs = transferUserToScreenX(x);
+            double ys = transferUserToScreenY(y);
+            // int ws = image.getWidth();    // can call only if image is a BufferedImage
+            // int hs = image.getHeight();
+            int ws = image.getWidth(null);
+            int hs = image.getHeight(null);
+            if (ws < 0 || hs < 0) throw new IllegalArgumentException("image " + filename + " is corrupt");
+
+            graphicsHidden.rotate(Math.toRadians(-degrees), xs, ys);
+            graphicsHidden.drawImage(image, (int) Math.round(xs - ws/2.0), (int) Math.round(ys - hs/2.0), null);
+            graphicsHidden.rotate(Math.toRadians(+degrees), xs, ys);
+
+            draw();
+            return this;
+        }
+
+        /**
+         * Draws the specified image centered at (<em>x</em>, <em>y</em>),
+         * rescaled to the specified bounding box.
+         * The supported image formats are JPEG, PNG, and GIF.
+         *
+         * @param  x the center <em>x</em>-coordinate of the image
+         * @param  y the center <em>y</em>-coordinate of the image
+         * @param  filename the name of the image/picture, e.g., "ball.gif"
+         * @param  scaledWidth the width of the scaled image (in screen coordinates)
+         * @param  scaledHeight the height of the scaled image (in screen coordinates)
+         * @throws IllegalArgumentException if either {@code scaledWidth}
+         *         or {@code scaledHeight} is negative
+         * @throws IllegalArgumentException if the image filename is invalid
+         */
+        public Pen picture(double x, double y, String filename, double scaledWidth, double scaledHeight) {
+            Image image = getImage(filename);
+            if (scaledWidth  < 0) throw new IllegalArgumentException("width  is negative: " + scaledWidth);
+            if (scaledHeight < 0) throw new IllegalArgumentException("height is negative: " + scaledHeight);
+            double xs = transferUserToScreenX(x);
+            double ys = transferUserToScreenY(y);
+            double ws = factorX(scaledWidth);
+            double hs = factorY(scaledHeight);
+            if (ws < 0 || hs < 0) throw new IllegalArgumentException("image " + filename + " is corrupt");
+            if (ws <= 1 && hs <= 1) pixel(x, y);
+            else {
+                graphicsHidden.drawImage(image, (int) Math.round(xs - ws/2.0),
+                        (int) Math.round(ys - hs/2.0),
+                        (int) Math.round(ws),
+                        (int) Math.round(hs), null);
+            }
+            draw();
+            return this;
+        }
+
+
+        /**
+         * Draws the specified image centered at (<em>x</em>, <em>y</em>), rotated
+         * given number of degrees, and rescaled to the specified bounding box.
+         * The supported image formats are JPEG, PNG, and GIF.
+         *
+         * @param  x the center <em>x</em>-coordinate of the image
+         * @param  y the center <em>y</em>-coordinate of the image
+         * @param  filename the name of the image/picture, e.g., "ball.gif"
+         * @param  scaledWidth the width of the scaled image (in screen coordinates)
+         * @param  scaledHeight the height of the scaled image (in screen coordinates)
+         * @param  degrees is the number of degrees to rotate counterclockwise
+         * @throws IllegalArgumentException if either {@code scaledWidth}
+         *         or {@code scaledHeight} is negative
+         * @throws IllegalArgumentException if the image filename is invalid
+         */
+        public Pen picture(double x, double y, String filename, double scaledWidth, double scaledHeight, double degrees) {
+            if (scaledWidth < 0) throw new IllegalArgumentException("width is negative: " + scaledWidth);
+            if (scaledHeight < 0) throw new IllegalArgumentException("height is negative: " + scaledHeight);
+            Image image = getImage(filename);
+            double xs = transferUserToScreenX(x);
+            double ys = transferUserToScreenY(y);
+            double ws = factorX(scaledWidth);
+            double hs = factorY(scaledHeight);
+            if (ws < 0 || hs < 0) throw new IllegalArgumentException("image " + filename + " is corrupt");
+            if (ws <= 1 && hs <= 1) pixel(x, y);
+
+            graphicsHidden.rotate(Math.toRadians(-degrees), xs, ys);
+            graphicsHidden.drawImage(image, (int) Math.round(xs - ws/2.0),
+                    (int) Math.round(ys - hs/2.0),
+                    (int) Math.round(ws),
+                    (int) Math.round(hs), null);
+            graphicsHidden.rotate(Math.toRadians(+degrees), xs, ys);
+
+            draw();
+            return this;
+        }
+
 
     }
 

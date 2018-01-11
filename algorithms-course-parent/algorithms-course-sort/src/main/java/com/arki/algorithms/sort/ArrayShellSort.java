@@ -6,23 +6,18 @@ public class ArrayShellSort {
      * @param arrayToSort
      */
     public static void sort(Comparable[] arrayToSort){
-        int length = arrayToSort.length;
-        int interval = 0;
-        int N = 0;
-        while (3 * N + 1 < length) {
-            interval = 3 * N + 1;
-            N++;
+        int N = arrayToSort.length;
+        int h = 0;
+        while (h < N / 3) {
+            h = 3 * h + 1;
         }
-        while (interval >= 1) {
-            for (int i = 0; i < interval; i++) {
-                for (int j = 1; i + j * interval < length; j++) {
-                    int t = i + j * interval;
-                    for (int k = j; k > 0 && less(arrayToSort[i + k * interval], arrayToSort[i + (k - 1) * interval]); k--) {
-                        exchange(arrayToSort, i + k * interval, i + (k - 1) * interval);
-                    }
+        while (h >= 1) {
+            for (int i = h; i < N; i++) {
+                for (int j = i; j - h >= 0 && less(arrayToSort[j], arrayToSort[j - h]); j -= h) {
+                    exchange(arrayToSort, j, j - h);
                 }
             }
-            interval -= 3;
+            h = (h - 1) / 3;
         }
     }
 
