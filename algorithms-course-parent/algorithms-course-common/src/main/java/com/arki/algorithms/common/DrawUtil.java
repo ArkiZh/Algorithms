@@ -16,10 +16,71 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DrawUtil {
 
+
+    public static Pen drawHistogramList(List<HistogramData> histogramDatalist) {
+
+        int M = histogramDatalist.size();
+        HistogramData histogramData = histogramDatalist.get(0);
+        Number[] dataArray = histogramData.getDataArray();
+        int N = dataArray.length;
+        double max = 0;
+        for (int i = 0; i < N; i++) {
+            double temp = dataArray[i].doubleValue();
+            max = temp > max ? temp : max;
+        }
+
+        double leftMargin = (N + 2) * 0.1;
+        double bottomMargin = max * 0.1;
+        double topPadding = max * 0.1;
+        double xmax = leftMargin * 2 + N + 2;
+        double ymax = bottomMargin * 2 + max + topPadding;
+        double ymaxFull = ymax * M;
+
+        Pen pen = new Pen();
+        pen.enableDisplayDefer();
+        pen.setCanvas(500, 309 * M);
+        pen.setXrange(0, xmax);
+        pen.setYrange(0, ymaxFull);
+
+        for (int i = 0; i < M; i++) {
+            HistogramData data = histogramDatalist.get(i);
+            Number[] array = data.getDataArray();
+            Map<Integer, Color> map = data.getColorMap();
+            double tempY = ymaxFull - ymax * i - ymax;
+            pen.setUserOrigin(0, tempY);
+            pen.setPenColor(Color.LIGHT_GRAY);
+            pen.fillRectangle(leftMargin, bottomMargin, N + 2, max + topPadding);
+            pen.line(0, 0, xmax, 0);
+
+            pen.setUserOrigin(leftMargin + 1, tempY + bottomMargin);
+            Color dataColor = Color.GRAY;
+            pen.setPenColor(dataColor);
+
+            double interval = 1;
+            double width = interval/2;
+            for (int j = 0; j < N; j++) {
+                if(map.containsKey(j)) pen.setPenColor(map.get(j));
+                else pen.setPenColor(dataColor);
+                pen.fillRectangle(interval * j, 0, width, array[j].doubleValue());
+            }
+        }
+
+        pen.show();
+
+        return pen;
+    }
+
+    /**
+     * Draw a single histogram.
+     * @param list
+     * @return
+     */
     public static Pen drawHistogram(List<? extends Number> list){
 
         int N = list.size();
@@ -56,27 +117,39 @@ public class DrawUtil {
     }
 
     public static void main(String[] args) {
+
+
+        List<HistogramData> list = new ArrayList<>();
+        HistogramData histogramData = new HistogramData();
+        Map<Integer, Color> colorMap = histogramData.getColorMap();
+        colorMap.put(1, Color.RED);
+        histogramData.setDataArray(new Integer[]{1, 2, 3, 4, 5, 6});
+        list.add(histogramData);
+        list.add(histogramData);
+        drawHistogramList(list);
+
+
 //        ArrayList<Integer> list = new ArrayList<>();
 //        for (int i = 0; i < 16; i++) {
 //            list.add(i+10);
 //        }
 //        Pen pen = drawHistogram(list);
 
-        Pen pen = new Pen();
-        pen.enableDisplayDefer();
-        pen.setCanvas(500, 500);
-        pen.setXrange(0, 1000);
-        pen.setYrange(0, 1000);
-        pen.setPenRadius(1);
-        for (int i = 0; i < 180; i++) {
-            pen.clear(Color.LIGHT_GRAY);
-            pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
-            pen.show();
-            pen.pause(250);
-            pen.clear(Color.blue);
-            pen.show();
-            pen.pause(250);
-        }
+//        Pen pen = new Pen();
+//        pen.enableDisplayDefer();
+//        pen.setCanvas(500, 500);
+//        pen.setXrange(0, 1000);
+//        pen.setYrange(0, 1000);
+//        pen.setPenRadius(1);
+//        for (int i = 0; i < 180; i++) {
+//            pen.clear(Color.LIGHT_GRAY);
+//            pen.line(0, 0, 500, 500).line(500, 500, 1000, 0).circle(500, 750, 250).pixel(500,750);
+//            pen.show();
+//            pen.pause(250);
+//            pen.clear(Color.blue);
+//            pen.show();
+//            pen.pause(250);
+//        }
     }
 
 
@@ -728,4 +801,34 @@ public class DrawUtil {
 
     }
 
+    public static class HistogramData {
+
+        private String title;
+        private Number[] dataArray;
+        private Map<Integer, Color> colorMap = new HashMap<>();
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Number[] getDataArray() {
+            return dataArray;
+        }
+
+        public void setDataArray(Number[] dataArray) {
+            this.dataArray = dataArray;
+        }
+
+        public Map<Integer, Color> getColorMap() {
+            return colorMap;
+        }
+
+        public void setColorMap(Map<Integer, Color> colorMap) {
+            this.colorMap = colorMap;
+        }
+    }
 }
