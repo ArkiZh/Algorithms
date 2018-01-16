@@ -1,5 +1,13 @@
 package com.arki.algorithms.sort;
 
+import com.arki.algorithms.common.DrawUtil;
+import com.arki.algorithms.common.FileUtil;
+import com.arki.algorithms.common.Logger;
+
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+
 public class ArrayInsertionSort {
     /**
      * The key procedure to sort the array.
@@ -11,6 +19,20 @@ public class ArrayInsertionSort {
                 exchange(arrayToSort, j, j - 1);
             }
         }
+    }
+
+    public static void sortWithHistogram(Integer[] arrayToSort) {
+        ArrayList<DrawUtil.HistogramData> histogramDataArrayList = new ArrayList<>();
+        for (int i = 1; i < arrayToSort.length; i++) {
+            for (int j = i; j - 1 >= 0 && less(arrayToSort[j], arrayToSort[j - 1]); j--) {
+                DrawUtil.histogramDataListAdd(histogramDataArrayList, arrayToSort, new Integer[]{j, j - 1}, Color.RED);
+                exchange(arrayToSort, j, j - 1);
+            }
+        }
+        DrawUtil.histogramDataListAdd(histogramDataArrayList, arrayToSort, null, null);
+        DrawUtil.Pen pen = DrawUtil.drawHistogramList(histogramDataArrayList);
+        File save = pen.save("ArrayInsertionSort.sortWithHistogram.png");
+        Logger.info("SortWithHistogram saved to: [{}]", FileUtil.getCanonicalPath(save));
     }
 
     /**

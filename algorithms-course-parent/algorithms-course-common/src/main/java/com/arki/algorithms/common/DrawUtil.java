@@ -23,6 +23,18 @@ import java.util.Map;
 public class DrawUtil {
 
 
+    public static void histogramDataListAdd(List<HistogramData> histogramDatalist, Number[] dataArray, Integer[] colorIndex, Color color) {
+        HistogramData histogramData = new HistogramData();
+        histogramData.setDataArray(ArrayUtil.copyArray(dataArray));
+        Map<Integer, Color> colorMap = histogramData.getColorMap();
+        if (colorIndex != null) {
+            for (int i = 0; i < colorIndex.length; i++) {
+                colorMap.put(colorIndex[i], color);
+            }
+        }
+        histogramDatalist.add(histogramData);
+    }
+
     public static Pen drawHistogramList(List<HistogramData> histogramDatalist) {
 
         int M = histogramDatalist.size();

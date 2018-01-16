@@ -18,7 +18,7 @@ public class ArraySortTest {
 //        }
 
         // Random int
-        File file = new File(dataToSortDirectory + "RandomInt.txt");
+        File file = new File(dataToSortDirectory + "RandomInt_[1,100]x30.txt");
         Logger.info("Read data from [{}]", FileUtil.getCanonicalPath(file));
         if (file.exists()) {
             StringBuilder sb = new StringBuilder();
@@ -45,49 +45,77 @@ public class ArraySortTest {
     @Test
     public void testArrayShellSort(){
         Timer timer = new Timer();
-        Integer[] a = ArrayUtil.copyArray(ArraySortTest.a);
-        Logger.info("ArrayShellSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArrayShellSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
         timer.start();
-        ArrayShellSort.sort(a);
+        ArrayShellSort.sort(arrayToSort);
         timer.stop();
         double time = timer.elapsedTime();
-        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(a));
-        Logger.info("Is sorted? [{}]   Elapsed time: [{}]", ArrayShellSort.isSorted(a), time);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]   Elapsed time: [{}]", ArrayShellSort.isSorted(arrayToSort), time);
+    }
+
+    @Test
+    public void testArrayShellSortWithHistogram(){
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArrayShellSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        ArrayShellSort.sortWithHistogram(arrayToSort);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]", ArrayShellSort.isSorted(arrayToSort));
     }
 
     @Test
     public void testArrayInsertionSort(){
         Timer timer = new Timer();
-        Integer[] a = ArrayUtil.copyArray(ArraySortTest.a);
-        Logger.info("ArrayInsertionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArrayInsertionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
         timer.start();
-        ArrayInsertionSort.sort(a);
+        ArrayInsertionSort.sort(arrayToSort);
         timer.stop();
         double time = timer.elapsedTime();
-        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(a));
-        Logger.info("Is sorted? [{}]   Elapsed time: [{}]",ArrayInsertionSort.isSorted(a),time);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]   Elapsed time: [{}]",ArrayInsertionSort.isSorted(arrayToSort),time);
+    }
+
+    @Test
+    public void testArrayInsertionSortWithHistogram(){
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArrayInsertionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        ArrayInsertionSort.sortWithHistogram(arrayToSort);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]",ArrayInsertionSort.isSorted(arrayToSort));
     }
 
     @Test
     public void testArraySelectionSort(){
         Timer timer = new Timer();
-        Integer[] a = ArrayUtil.copyArray(ArraySortTest.a);
-        Logger.info("ArraySelectionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArraySelectionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
         timer.start();
-        ArraySelectionSort.sort(a);
+        ArraySelectionSort.sort(arrayToSort);
         timer.stop();
         double time = timer.elapsedTime();
-        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(a));
-        Logger.info("Is sorted? [{}]   Elapsed time: [{}]",ArraySelectionSort.isSorted(a),time);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]   Elapsed time: [{}]",ArraySelectionSort.isSorted(arrayToSort),time);
+    }
+
+    @Test
+    public void testArraySelectionSortWithHistogram(){
+        Integer[] arrayToSort = ArrayUtil.copyArray(ArraySortTest.a);
+        Logger.info("ArraySelectionSort. The array to sort is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        ArraySelectionSort.sortWithHistogram(arrayToSort);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]",ArraySelectionSort.isSorted(arrayToSort));
     }
 
 
     public static void main(String[] args) {
-        File file = FileUtil.createFileAccessIfExists("algorithms-course-parent" + FileUtil.fileSeparator + "algorithms-course-sort" + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt.txt");
         // Generate N random integers in [min,max]
-        int N = 10000;
-        int min = 0;
-        int max = 1000;
+        int N = 30;
+        int min = 1;
+        int max = 100;
+        File file = FileUtil.createFileAccessIfExists("algorithms-course-parent" + FileUtil.fileSeparator + "algorithms-course-sort"
+                + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + N + ".txt");
         try {
             FileWriter writer = new FileWriter(file);
             for (int i = 0; i < N - 1; i++) {
