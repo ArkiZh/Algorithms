@@ -42,6 +42,30 @@ public class ArraySortTest {
         }
     }
 
+
+    @Test
+    public void testArrayMergeRecurseSort() {
+        Timer timer = new Timer();
+        Integer[] arrayToSort = ArrayUtil.copyArray(a);
+        Logger.info("ArrayMergeRecurseSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        timer.start();
+        ArrayMergeRecurseSort.sort(arrayToSort);
+        timer.stop();
+        double time = timer.elapsedTime();
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]   Elapsed time: [{}]", ArrayMergeRecurseSort.isSorted(arrayToSort), time);
+    }
+
+    @Test
+    public void testArrayMergeRecurseSortWithHistogram() {
+        Integer[] arrayToSort = ArrayUtil.copyArray(a);
+        Logger.info("ArrayMergeRecurseSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        ArrayMergeRecurseSort.sortWithHistogram(arrayToSort);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]", ArrayMergeRecurseSort.isSorted(arrayToSort));
+    }
+
+
     @Test
     public void testArrayShellSort(){
         Timer timer = new Timer();
