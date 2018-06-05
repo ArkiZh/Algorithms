@@ -44,6 +44,20 @@ public class ArraySortTest {
 
 
     @Test
+    public void testArrayMergeBottomupSort() {
+        Timer timer = new Timer();
+        Integer[] arrayToSort = ArrayUtil.copyArray(a);
+        Logger.info("ArrayMergeBottomupSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        timer.start();
+        ArrayMergeBottomupSort.sort(arrayToSort);
+        timer.stop();
+        double time = timer.elapsedTime();
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]   Elapsed time: [{}]", ArrayMergeRecurseSort.isSorted(arrayToSort), time);
+
+    }
+
+    @Test
     public void testArrayMergeRecurseSort() {
         Timer timer = new Timer();
         Integer[] arrayToSort = ArrayUtil.copyArray(a);
