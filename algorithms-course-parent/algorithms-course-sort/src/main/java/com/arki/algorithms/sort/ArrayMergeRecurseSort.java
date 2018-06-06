@@ -81,7 +81,7 @@ public class ArrayMergeRecurseSort {
         Map<Integer, Color> colorMap = histogramData.getColorMap();
         histogramData.setDataArray(ArrayUtil.copyArray(arrayToSort));
         for (int i = lo; i <= mid; i++) colorMap.put(i,Color.RED);
-        for (int i = mid + 1; i <= hi; i++) colorMap.put(i, Color.PINK);
+        for (int i = mid + 1; i <= hi; i++) colorMap.put(i, Color.BLUE);
         list.add(histogramData);
         merge(arrayToSort, lo, mid, hi, aux);
     }

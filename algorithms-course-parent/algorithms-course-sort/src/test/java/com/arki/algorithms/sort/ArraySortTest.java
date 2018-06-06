@@ -4,6 +4,7 @@ import com.arki.algorithms.common.*;
 import org.junit.Test;
 
 import java.io.*;
+import java.lang.reflect.Method;
 
 public class ArraySortTest {
 
@@ -19,7 +20,11 @@ public class ArraySortTest {
 
         // Random int
         File file = new File(dataToSortDirectory + "RandomInt_[1,100]x30.txt");
+        a = readIntegerArrayFromFile(file);
+    }
+    private static Integer[] readIntegerArrayFromFile(File file){
         Logger.info("Read data from [{}]", FileUtil.getCanonicalPath(file));
+        Integer[] integers = null;
         if (file.exists()) {
             StringBuilder sb = new StringBuilder();
             try {
@@ -35,11 +40,38 @@ public class ArraySortTest {
                 e.printStackTrace();
             }
             String[] split = sb.toString().split(",");
-            a = new Integer[split.length];
+            integers = new Integer[split.length];
             for (int i = 0; i < split.length; i++) {
-                a[i] = Integer.valueOf(split[i]);
+                integers[i] = Integer.valueOf(split[i]);
             }
         }
+        return integers;
+    }
+
+    @Test
+    public void testSortCompare() throws Exception {
+        int min = 0;
+        int max = 1000;
+        int count = 10000;
+        String pathname = dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + count + ".txt";
+        Logger.info("Integers for test: {}", pathname);
+        Integer[] integers = readIntegerArrayFromFile(new File(pathname));
+        Class[] sortClazz = new Class[]{ArrayShellSort.class,ArrayMergeRecurseSort.class,ArrayMergeBottomupSort.class};
+        Timer timer = new Timer();
+        for (int i = 0; i < sortClazz.length; i++) {
+            Class clazz = sortClazz[i];
+            Method sort = clazz.getDeclaredMethod("sort", Comparable[].class);
+            Integer[] arrayToSort = ArrayUtil.copyArray(integers);
+            Object[] param = {arrayToSort};
+            timer.start();
+            sort.invoke(null, param);
+            timer.stop();
+            Method isSorted = clazz.getDeclaredMethod("isSorted", Comparable[].class);
+            Logger.info("Sort type: {}. Elapsed time:[{}]. Sorted? [{}]", clazz.getSimpleName(), timer.elapsedTime(), isSorted.invoke(null, param));
+        }
+
+
+
     }
 
 
@@ -55,6 +87,15 @@ public class ArraySortTest {
         Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
         Logger.info("Is sorted? [{}]   Elapsed time: [{}]", ArrayMergeRecurseSort.isSorted(arrayToSort), time);
 
+    }
+
+    @Test
+    public void testArrayMergeBottomupSortWithHistogram() {
+        Integer[] arrayToSort = ArrayUtil.copyArray(a);
+        Logger.info("ArrayMergeBottomupSort. The array to sort is: {}", ArrayUtil.transferArrayToString(a));
+        ArrayMergeBottomupSort.sortWithHistogram(arrayToSort);
+        Logger.info("Result is: {}", ArrayUtil.transferArrayToString(arrayToSort));
+        Logger.info("Is sorted? [{}]", ArrayMergeBottomupSort.isSorted(arrayToSort));
     }
 
     @Test
@@ -149,14 +190,25 @@ public class ArraySortTest {
 
     public static void main(String[] args) {
         // Generate N random integers in [min,max]
-        int N = 30;
-        int min = 1;
-        int max = 100;
+        int N = 500000;
+        int min = 0;
+        int max = 1000000;
+        generateIntegers(N, min, max);
+    }
+
+    /**
+     * Generate integers for test.
+     * @param count The amount of integers.
+     * @param min The min value.
+     * @param max The max value.
+     * @return The file contains integers for test, separated by commas, named by "RandomInt_[{min},{max}]x{count}.txt"
+     */
+    private static File generateIntegers(int count, int min, int max) {
         File file = FileUtil.createFileAccessIfExists("algorithms-course-parent" + FileUtil.fileSeparator + "algorithms-course-sort"
-                + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + N + ".txt");
+                + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + count + ".txt");
         try {
             FileWriter writer = new FileWriter(file);
-            for (int i = 0; i < N - 1; i++) {
+            for (int i = 0; i < count - 1; i++) {
                 writer.write(MathUtil.randomInt(min, max) + ",");
             }
             writer.write(MathUtil.randomInt(min, max) + "");
@@ -164,5 +216,6 @@ public class ArraySortTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return file;
     }
 }
