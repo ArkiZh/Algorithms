@@ -22,6 +22,14 @@ public class ArrayUtil {
         return t;
     }
 
+    public static <T> T[] copyArray(T[] a, int startIndex, int endIndex) {
+        T[] t = (T[]) Array.newInstance(a[0].getClass(), endIndex - startIndex + 1);
+        for (int i = startIndex; i <= endIndex; i++) {
+            t[i - startIndex] = a[i];
+        }
+        return t;
+    }
+
     public static void main(String[] args) {
         Integer[] integers = new Integer[10];
         for (int i = 0; i < 10; i++) {
