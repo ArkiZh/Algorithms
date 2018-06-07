@@ -10,6 +10,17 @@ public class Timer {
     private boolean pause = true;
 
     /**
+     * Reset the timer by clearing all records and set the status to pause.
+     * If need to record time again, just start the timer fist and use it as usual.
+     * @return the timer itself. Convenient for calling chain.
+     */
+    public Timer reset(){
+        pause = true;
+        records.clear();
+        return this;
+    }
+
+    /**
      * Start the timer.
      */
     public void start(){
