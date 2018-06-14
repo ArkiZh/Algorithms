@@ -77,6 +77,17 @@ public class ArraySortTest {
 
 
     @Test
+    public void testMaxPriorityQueue() {
+        MaxPriorityQueue<Integer> pq = new MaxPriorityQueue<>(a);
+        Logger.info("Max priority queue is well structured? [{}]", pq.wellStructured());
+        if (pq.wellStructured()) {
+            Logger.info("The    largest value = [{}]", pq.deleteMax());
+            Logger.info("Second largest value = [{}]",pq.max());
+        }
+    }
+
+
+    @Test
     public void testArrayQuickSort() {
         Timer timer = new Timer();
         Integer[] arrayToSort = ArrayUtil.copyArray(a);
