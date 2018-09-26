@@ -3,6 +3,10 @@ package com.arki.algorithms.sort;
 
 import java.lang.reflect.Array;
 
+/**
+ * Priority queue based on binary max-heap using array data structure.
+ * @param <Key>
+ */
 public class MaxPriorityQueue<Key extends Comparable<Key>> {
     private Key[] keys;
     private int size;

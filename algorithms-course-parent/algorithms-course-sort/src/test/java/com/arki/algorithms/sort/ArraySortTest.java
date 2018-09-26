@@ -20,33 +20,9 @@ public class ArraySortTest {
 
         // Random int
         File file = new File(dataToSortDirectory + "RandomInt_[1,100]x30.txt");
-        a = readIntegerArrayFromFile(file);
+        a = TestDataUtil.readIntegerArrayFromFile(file);
     }
-    private static Integer[] readIntegerArrayFromFile(File file){
-        Logger.info("Read data from [{}]", FileUtil.getCanonicalPath(file));
-        Integer[] integers = null;
-        if (file.exists()) {
-            StringBuilder sb = new StringBuilder();
-            try {
-                FileReader reader = new FileReader(file);
-                int read = 0;
-                while(read!=-1){
-                    read = reader.read();
-                    if(read!=-1) sb.append((char)read);
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            String[] split = sb.toString().split(",");
-            integers = new Integer[split.length];
-            for (int i = 0; i < split.length; i++) {
-                integers[i] = Integer.valueOf(split[i]);
-            }
-        }
-        return integers;
-    }
+
 
     @Test
     public void testSortCompare() throws Exception {
@@ -55,7 +31,7 @@ public class ArraySortTest {
         int count = 1000000;
         String pathname = dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + count + ".txt";
         Logger.info("Integers for test: {}", pathname);
-        Integer[] integers = readIntegerArrayFromFile(new File(pathname));
+        Integer[] integers = TestDataUtil.readIntegerArrayFromFile(new File(pathname));
         Class[] sortClazz = new Class[]{ArrayShellSort.class,
                 ArrayMergeRecurseSort.class,
                 ArrayMergeBottomupSort.class,
@@ -216,33 +192,13 @@ public class ArraySortTest {
 
 
     public static void main(String[] args) {
-        // Generate N random integers in [min,max]
-        int N = 1000000;
-        int min = 0;
-        int max = 1000000;
-        generateIntegers(N, min, max);
-    }
 
-    /**
-     * Generate integers for test.
-     * @param count The amount of integers.
-     * @param min The min value.
-     * @param max The max value.
-     * @return The file contains integers for test, separated by commas, named by "RandomInt_[{min},{max}]x{count}.txt"
-     */
-    private static File generateIntegers(int count, int min, int max) {
-        File file = FileUtil.createFileAccessIfExists("algorithms-course-parent" + FileUtil.fileSeparator + "algorithms-course-sort"
-                + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + count + ".txt");
-        try {
-            FileWriter writer = new FileWriter(file);
-            for (int i = 0; i < count - 1; i++) {
-                writer.write(MathUtil.randomInt(min, max) + ",");
-            }
-            writer.write(MathUtil.randomInt(min, max) + "");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return file;
+        // Generate N random integers in [min,max]
+        int N = 100;
+        int min = 0;
+        int max = 100;
+        File file = new File("algorithms-course-parent" + FileUtil.fileSeparator + "algorithms-course-sort"
+                + FileUtil.fileSeparator + dataToSortDirectory + "RandomInt_[" + min + "," + max + "]x" + N + ".txt");
+        TestDataUtil.generateRandomIntegers(N, min, max, file);
     }
 }
