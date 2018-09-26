@@ -7,7 +7,7 @@ public class ArrayUtil {
         StringBuilder sb = new StringBuilder();
         sb.append('[');
         for (int i = 0; i < a.length; i++) {
-            sb.append(a[i].toString()).append(',');
+            sb.append(String.valueOf(a[i])).append(',');
         }
         String s = sb.substring(0, sb.length() - 1);
         return s + "]";
